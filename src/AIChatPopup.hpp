@@ -31,7 +31,7 @@ protected:
     LevelEditorLayer* m_lel = nullptr;
     geode::TextInput* m_input = nullptr;
     geode::ScrollLayer* m_scroll = nullptr;
-    geode::TextArea* m_chatText = nullptr;
+    geode::       TextArea* m_chatText = nullptr;
     cocos2d::CCNode* m_previewHolder = nullptr;
     cocos2d::CCLabelBMFont* m_previewLabel = nullptr;
 
