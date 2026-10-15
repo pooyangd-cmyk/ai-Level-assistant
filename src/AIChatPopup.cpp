@@ -2,6 +2,7 @@
 #include "BuildTasks.hpp"
 #include <Geode/utils/file.hpp>
 #include <algorithm>
+#include <cctype>
 
 using namespace geode::prelude;
 
@@ -39,6 +40,7 @@ bool AIChatPopup::init(LevelEditorLayer* lel) {
     // input row
     m_input = TextInput::create(chatW - 70.f, "Ask the AI to build something...", "chatFont.fnt");
     m_input->setMaxCharCount(400);
+    m_input->setCommonFilter(CommonFilter::Any);
     m_input->setPosition({20.f + (chatW - 70.f) / 2.f, 42.f});
     m_mainLayer->addChild(m_input);
 
@@ -155,6 +157,11 @@ void AIChatPopup::onSend() {
     auto text = m_input->getString();
     if (text.empty()) return;
     m_input->setString("");
+
+    // never echo API keys into the chat log
+    if (text.rfind("/key ", 0) == 0 || text.rfind("/groq ", 0) == 0 || text.rfind("/anthropic ", 0) == 0) {
+        return this->handleCommand(text);
+    }
     this->say(Who::User, text);
 
     if (text[0] == '/') return this->handleCommand(text);
@@ -173,11 +180,51 @@ void AIChatPopup::onSend() {
 }
 
 void AIChatPopup::handleCommand(std::string const& cmd) {
+    auto mod = Mod::get();
+    auto argOf = [&](size_t skip) {
+        std::string v = cmd.size() > skip ? cmd.substr(skip) : "";
+        v.erase(std::remove_if(v.begin(), v.end(), [](unsigned char c) { return std::isspace(c); }), v.end());
+        return v;
+    };
+
     if (cmd == "/help") {
         return this->say(Who::System,
-            "/image [cells] - turn the selected image into blocks (no API key needed)\n"
+            "/groq <key> - use a Groq key (sets model + endpoint too)\n"
+            "/anthropic <key> - use an Anthropic key\n"
+            "/key <key> - only change the key\n"
+            "/model <name> - change the model\n"
+            "/status - show current setup\n"
+            "/image [cells] - turn the selected image into blocks (no key needed)\n"
             "/clear - clear chat\n"
             "Anything else goes to the AI.");
+    }
+    if (cmd.rfind("/groq ", 0) == 0 || cmd.rfind("/anthropic ", 0) == 0 || cmd.rfind("/key ", 0) == 0) {
+        bool groq = cmd.rfind("/groq ", 0) == 0;
+        bool anth = cmd.rfind("/anthropic ", 0) == 0;
+        auto key = argOf(cmd.find(' ') + 1);
+        if (key.size() < 10) return this->say(Who::Error, "That key looks too short. Paste the full key after the command.");
+        if (groq) {
+            (void)mod->setSettingValue<std::string>("endpoint", "https://api.groq.com/openai/v1/chat/completions");
+            (void)mod->setSettingValue<std::string>("model", "llama-3.3-70b-versatile");
+        } else if (anth) {
+            (void)mod->setSettingValue<std::string>("endpoint", "https://api.anthropic.com/v1/messages");
+            (void)mod->setSettingValue<std::string>("model", "claude-sonnet-5-5");
+        }
+        (void)mod->setSettingValue<std::string>("api-key", key);
+        return this->say(Who::System, fmt::format("Key saved ({} characters). Ask me something!", key.size()));
+    }
+    if (cmd.rfind("/model ", 0) == 0) {
+        auto name = argOf(7);
+        if (name.empty()) return this->say(Who::Error, "Usage: /model <name>");
+        (void)mod->setSettingValue<std::string>("model", name);
+        return this->say(Who::System, "Model set to " + name);
+    }
+    if (cmd == "/status") {
+        auto key = mod->getSettingValue<std::string>("api-key");
+        return this->say(Who::System, fmt::format("endpoint: {}\nmodel: {}\nkey: {} characters, starts with '{}'",
+            mod->getSettingValue<std::string>("endpoint"),
+            mod->getSettingValue<std::string>("model"),
+            key.size(), key.substr(0, 4)));
     }
     if (cmd == "/clear") return this->onClear();
     if (cmd.rfind("/image", 0) == 0) {
