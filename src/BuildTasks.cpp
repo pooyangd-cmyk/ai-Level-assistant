@@ -124,7 +124,7 @@ TaskResult imageToObjects(Ctx& c, matjson::Value const& p, Bitmap const* image) 
     for (size_t i = 0; i < q.palette.size(); i++) {
         auto t = static_cast<EffectGameObject*>(put(c, 899, {x0 - 45.f, y0 - 30.f * i}));
         if (!t) break;
-        t->m_targetColorID = firstCh + static_cast<int>(i);
+        t->m_targetGroupID = firstCh + ...m_targetColorID
         t->m_triggerTargetColor = q.palette[i];
         t->m_duration = 0.f;
         t->m_opacity = 1.f;
