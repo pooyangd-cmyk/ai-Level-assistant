@@ -11,23 +11,29 @@
     "version": "v1.0.0",
     "developer": "aidev",
     "description": "Chat with an AI inside the editor. It builds objects for you and turns images into pixel art.",
-    "tags": ["editor", "utility"],
+    "tags": [
+        "editor",
+        "utility"
+    ],
     "settings": {
         "api-key": {
             "type": "string",
             "name": "Anthropic API key",
             "description": "Your own API key. Stored locally in this mod's save data and only sent to the endpoint below.",
-            "default": ""
+            "default": "",
+            "filter": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
         },
         "model": {
             "type": "string",
             "name": "Model",
-            "default": "claude-sonnet-5-5"
+            "default": "claude-sonnet-5-5",
+            "filter": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
         },
         "endpoint": {
             "type": "string",
             "name": "API endpoint",
-            "default": "https://api.anthropic.com/v1/messages"
+            "default": "https://api.anthropic.com/v1/messages",
+            "filter": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
         },
         "circle-size": {
             "type": "int",
@@ -36,7 +42,9 @@
             "default": 64,
             "min": 16,
             "max": 256,
-            "control": { "slider": true }
+            "control": {
+                "slider": true
+            }
         },
         "max-objects": {
             "type": "int",
