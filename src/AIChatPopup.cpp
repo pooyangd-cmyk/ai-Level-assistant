@@ -97,7 +97,7 @@ void AIChatPopup::rebuildChat() {
 
     if (m_chatText) m_chatText->removeFromParent();
     auto viewH = m_scroll->getContentSize().height;
-    m_chatText = TextArea::create(markup, "chatFont.fnt", 1.f, m_scroll->getContentSize().width - 8.f,
+    m_chatText = TextArea::create(markup, "chatFont.fnt", 1.f, m_scroll->getContentSize().width - 30.f,
                                   {0.f, 1.f}, 14.f, false);
     float h = std::max(viewH, m_chatText->getContentSize().height + 8.f);
     m_scroll->m_contentLayer->setContentSize({m_scroll->getContentSize().width, h});
